@@ -17,7 +17,18 @@
       <h1>Análise de registros</h1>
       <p>Acompanhe os principais desafios, ferramentas e metas dos participantes.</p>
     </div>
-    <a href="index.html" class="button-secondary">Novo registro</a>
+
+    <div class="dashboard-top-actions">
+      <div class="update-status subtle-update">
+        <span>Última atualização</span>
+        <strong id="lastUpdate">Carregando...</strong>
+      </div>
+      <div class="update-status subtle-update">
+        <span>Próxima atualização</span>
+        <strong id="refreshCountdown">60s</strong>
+      </div>
+      <button id="refreshDashboard" class="button-light" type="button">Atualizar agora</button>
+    </div>
   </header>
 
   <main class="dashboard-container">
@@ -35,11 +46,6 @@
         </select>
       </label>
       <button id="clearFilters" class="button-light">Limpar filtros</button>
-      <button id="refreshDashboard" class="button-light" type="button">Atualizar agora</button>
-      <div class="update-status">
-        <span>Última atualização</span>
-        <strong id="lastUpdate">Carregando...</strong>
-      </div>
     </section>
 
     <section class="kpi-grid">
@@ -82,12 +88,20 @@
         <canvas id="ferramentasChart"></canvas>
       </article>
 
-      <article class="chart-card chart-wide">
+      <article class="chart-card">
         <div class="card-title">
           <h2>Metas para 2026</h2>
           <p>Prioridades mais importantes para o próximo ciclo.</p>
         </div>
         <canvas id="metasChart"></canvas>
+      </article>
+
+      <article class="chart-card chart-wide">
+        <div class="card-title">
+          <h2>Total de respostas por mês</h2>
+          <p>Evolução mensal de janeiro a dezembro, com destaque para o mês selecionado.</p>
+        </div>
+        <canvas id="respostasMesChart"></canvas>
       </article>
     </section>
 
