@@ -6,11 +6,12 @@ const clearFilters = document.getElementById("clearFilters");
 const recordsTable = document.getElementById("recordsTable");
 const refreshDashboardButton = document.getElementById("refreshDashboard");
 const lastUpdate = document.getElementById("lastUpdate");
-const refreshCountdown = document.getElementById("refreshCountdown");
+const refreshProgressBar = document.getElementById("refreshProgressBar");
 
 let allData = [];
 let charts = {};
 let secondsToRefresh = 60;
+const REFRESH_INTERVAL_SECONDS = 60;
 let isLoading = false;
 
 const monthNames = [
@@ -331,21 +332,28 @@ function updateLastUpdateTime() {
   }));
 }
 
+function updateRefreshProgress() {
+  if (!refreshProgressBar) return;
+
+  const elapsed = REFRESH_INTERVAL_SECONDS - secondsToRefresh;
+  const percentage = Math.min(100, Math.max(0, (elapsed / REFRESH_INTERVAL_SECONDS) * 100));
+  refreshProgressBar.style.width = `${percentage}%`;
+}
+
 function resetCountdown() {
-  secondsToRefresh = 60;
-  if (refreshCountdown) refreshCountdown.textContent = `${secondsToRefresh}s`;
+  secondsToRefresh = REFRESH_INTERVAL_SECONDS;
+  updateRefreshProgress();
 }
 
 function updateCountdown() {
   if (isLoading) return;
 
   secondsToRefresh -= 1;
+  updateRefreshProgress();
+
   if (secondsToRefresh <= 0) {
     initDashboard();
-    return;
   }
-
-  if (refreshCountdown) refreshCountdown.textContent = `${secondsToRefresh}s`;
 }
 
 async function initDashboard() {
