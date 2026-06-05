@@ -10,8 +10,8 @@ const refreshProgressBar = document.getElementById("refreshProgressBar");
 
 let allData = [];
 let charts = {};
-let secondsToRefresh = 60;
-const REFRESH_INTERVAL_SECONDS = 60;
+const REFRESH_INTERVAL_MS = 60000;
+let refreshStartedAt = Date.now();
 let isLoading = false;
 
 const monthNames = [
@@ -335,23 +335,20 @@ function updateLastUpdateTime() {
 function updateRefreshProgress() {
   if (!refreshProgressBar) return;
 
-  const elapsed = REFRESH_INTERVAL_SECONDS - secondsToRefresh;
-  const percentage = Math.min(100, Math.max(0, (elapsed / REFRESH_INTERVAL_SECONDS) * 100));
+  const elapsed = Date.now() - refreshStartedAt;
+  const percentage = Math.min(100, Math.max(0, (elapsed / REFRESH_INTERVAL_MS) * 100));
   refreshProgressBar.style.width = `${percentage}%`;
 }
 
-function resetCountdown() {
-  secondsToRefresh = REFRESH_INTERVAL_SECONDS;
+function resetRefreshProgress() {
+  refreshStartedAt = Date.now();
   updateRefreshProgress();
 }
 
-function updateCountdown() {
-  if (isLoading) return;
-
-  secondsToRefresh -= 1;
+function updateAutoRefreshProgress() {
   updateRefreshProgress();
 
-  if (secondsToRefresh <= 0) {
+  if (!isLoading && Date.now() - refreshStartedAt >= REFRESH_INTERVAL_MS) {
     initDashboard();
   }
 }
@@ -374,7 +371,7 @@ async function initDashboard() {
     populateFilters();
     renderDashboard();
     updateLastUpdateTime();
-    resetCountdown();
+    resetRefreshProgress();
   } catch (error) {
     recordsTable.innerHTML = '<tr><td colspan="2">Não foi possível carregar os dados. Verifique o código do Apps Script.</td></tr>';
     setLastUpdateStatus("Erro ao atualizar");
@@ -401,4 +398,4 @@ if (refreshDashboardButton) {
 }
 
 initDashboard();
-setInterval(updateCountdown, 1000);
+setInterval(updateAutoRefreshProgress, 250);
