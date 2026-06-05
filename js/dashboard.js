@@ -4,6 +4,8 @@ const monthFilter = document.getElementById("monthFilter");
 const yearFilter = document.getElementById("yearFilter");
 const clearFilters = document.getElementById("clearFilters");
 const recordsTable = document.getElementById("recordsTable");
+const refreshDashboardButton = document.getElementById("refreshDashboard");
+const lastUpdate = document.getElementById("lastUpdate");
 
 let allData = [];
 let charts = {};
@@ -154,10 +156,10 @@ function updateCharts(data) {
 }
 
 function updateTable(data) {
-  const latest = [...data].reverse().slice(0, 30);
+  const latest = [...data].reverse().slice(0, 20);
 
   if (!latest.length) {
-    recordsTable.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado.</td></tr>';
+    recordsTable.innerHTML = '<tr><td colspan="2">Nenhum registro encontrado.</td></tr>';
     return;
   }
 
@@ -165,10 +167,6 @@ function updateTable(data) {
     <tr>
       <td>${formatDate(item.dataHora)}</td>
       <td>${item.nome || "-"}</td>
-      <td>${item.telefone || "-"}</td>
-      <td>${item.desafio || "-"}</td>
-      <td>${item.ferramenta || "-"}</td>
-      <td>${item.meta || "-"}</td>
     </tr>
   `).join("");
 }
@@ -180,14 +178,44 @@ function renderDashboard() {
   updateTable(filteredData);
 }
 
+function setLastUpdateStatus(text) {
+  if (lastUpdate) lastUpdate.textContent = text;
+}
+
+function updateLastUpdateTime() {
+  const now = new Date();
+  setLastUpdateStatus(now.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }));
+}
+
 async function initDashboard() {
   try {
+    if (refreshDashboardButton) {
+      refreshDashboardButton.disabled = true;
+      refreshDashboardButton.textContent = "Atualizando...";
+    }
+
+    setLastUpdateStatus("Atualizando...");
+
     const response = await loadJsonp(API_URL);
     allData = response.dados || [];
     populateFilters();
     renderDashboard();
+    updateLastUpdateTime();
   } catch (error) {
-    recordsTable.innerHTML = '<tr><td colspan="6">Não foi possível carregar os dados. Verifique o código do Apps Script.</td></tr>';
+    recordsTable.innerHTML = '<tr><td colspan="2">Não foi possível carregar os dados. Verifique o código do Apps Script.</td></tr>';
+    setLastUpdateStatus("Erro ao atualizar");
+  } finally {
+    if (refreshDashboardButton) {
+      refreshDashboardButton.disabled = false;
+      refreshDashboardButton.textContent = "Atualizar agora";
+    }
   }
 }
 
@@ -199,4 +227,9 @@ clearFilters.addEventListener("click", () => {
   renderDashboard();
 });
 
+if (refreshDashboardButton) {
+  refreshDashboardButton.addEventListener("click", initDashboard);
+}
+
 initDashboard();
+setInterval(initDashboard, 60000);
