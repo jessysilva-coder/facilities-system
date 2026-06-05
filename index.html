@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facilities Inteligente | Registro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="page-form">
+  <main class="hero-page">
+    <section class="hero-content">
+      <div class="brand-chip">Facilities + Tecnologia</div>
+      <h1>Mapeamento de desafios em Facilities</h1>
+      <p>
+        Responda o formulário para registrar os principais desafios, ferramentas e metas de Facilities para 2026.
+      </p>
+    </section>
+
+    <section class="form-card">
+      <div class="form-header">
+        <span class="form-icon">🏢</span>
+        <div>
+          <h2>Formulário de registro</h2>
+          <p>Preencha os dados abaixo.</p>
+        </div>
+      </div>
+
+      <form id="facilitiesForm">
+        <label>
+          Nome
+          <input type="text" id="nome" name="nome" placeholder="Digite seu nome" required />
+        </label>
+
+        <label>
+          Telefone
+          <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" required />
+        </label>
+
+        <label>
+          Qual é hoje o maior desafio em Facilities na sua empresa?
+          <select id="desafio" name="desafio" required>
+            <option value="">Selecione uma opção</option>
+            <option>Custos</option>
+            <option>Absenteísmo</option>
+            <option>Manutenção</option>
+            <option>Energia</option>
+            <option>Limpeza</option>
+            <option>Segurança</option>
+            <option>Experiência do usuário</option>
+          </select>
+        </label>
+
+        <label>
+          Qual ferramenta você usa para acompanhar indicadores?
+          <select id="ferramenta" name="ferramenta" required>
+            <option value="">Selecione uma opção</option>
+            <option>Excel</option>
+            <option>Sistema interno</option>
+            <option>Power BI</option>
+            <option>Não utiliza</option>
+          </select>
+        </label>
+
+        <label>
+          Qual meta mais importante para 2026 em Facilities?
+          <select id="meta" name="meta" required>
+            <option value="">Selecione uma opção</option>
+            <option>Reduzir custos</option>
+            <option>ESG</option>
+            <option>Melhorar experiência do usuário</option>
+            <option>Implementar IOT</option>
+            <option>Aumentar eficiência operacional</option>
+          </select>
+        </label>
+
+        <button type="submit" id="submitButton">Enviar registro</button>
+        <p id="formMessage" class="form-message" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <img src="img/logo.png" alt="SSX Global Solutions" class="footer-logo" />
+    <p>Desenvolvido por SSX Global Solutions - 2026</p>
+  </footer>
+
+  <script src="js/form.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facilities Inteligente | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="page-dashboard">
+  <header class="dashboard-header">
+    <div>
+      <span class="brand-chip">Dashboard Facilities</span>
+      <h1>Análise de registros</h1>
+      <p>Acompanhe os principais desafios, ferramentas e metas dos participantes.</p>
+    </div>
+    <a href="index.html" class="button-secondary">Novo registro</a>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="filter-bar">
+      <label>
+        Mês
+        <select id="monthFilter">
+          <option value="all">Todos</option>
+        </select>
+      </label>
+      <label>
+        Ano
+        <select id="yearFilter">
+          <option value="all">Todos</option>
+        </select>
+      </label>
+      <button id="clearFilters" class="button-light">Limpar filtros</button>
+    </section>
+
+    <section class="kpi-grid">
+      <article class="kpi-card">
+        <span>📋</span>
+        <p>Total de respostas</p>
+        <strong id="totalRespostas">0</strong>
+      </article>
+      <article class="kpi-card">
+        <span>⚠️</span>
+        <p>Principal desafio</p>
+        <strong id="principalDesafio">-</strong>
+      </article>
+      <article class="kpi-card">
+        <span>📊</span>
+        <p>Ferramenta mais usada</p>
+        <strong id="principalFerramenta">-</strong>
+      </article>
+      <article class="kpi-card">
+        <span>🎯</span>
+        <p>Meta mais escolhida</p>
+        <strong id="principalMeta">-</strong>
+      </article>
+    </section>
+
+    <section class="charts-grid">
+      <article class="chart-card">
+        <div class="card-title">
+          <h2>Desafios em Facilities</h2>
+          <p>Distribuição das respostas por principal desafio.</p>
+        </div>
+        <canvas id="desafiosChart"></canvas>
+      </article>
+
+      <article class="chart-card">
+        <div class="card-title">
+          <h2>Ferramentas utilizadas</h2>
+          <p>Como as empresas acompanham indicadores.</p>
+        </div>
+        <canvas id="ferramentasChart"></canvas>
+      </article>
+
+      <article class="chart-card chart-wide">
+        <div class="card-title">
+          <h2>Metas para 2026</h2>
+          <p>Prioridades mais importantes para o próximo ciclo.</p>
+        </div>
+        <canvas id="metasChart"></canvas>
+      </article>
+    </section>
+
+    <section class="table-card">
+      <div class="card-title">
+        <h2>Últimos registros</h2>
+        <p>Visualização dos dados recebidos no formulário.</p>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Nome</th>
+              <th>Telefone</th>
+              <th>Desafio</th>
+              <th>Ferramenta</th>
+              <th>Meta 2026</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTable">
+            <tr><td colspan="6">Carregando dados...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer dashboard-footer">
+    <img src="img/logo.png" alt="SSX Global Solutions" class="footer-logo" />
+    <p>Desenvolvido por SSX Global Solutions - 2026</p>
+  </footer>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
