@@ -35,6 +35,11 @@
         </select>
       </label>
       <button id="clearFilters" class="button-light">Limpar filtros</button>
+      <button id="refreshDashboard" class="button-light" type="button">Atualizar agora</button>
+      <div class="update-status">
+        <span>Última atualização</span>
+        <strong id="lastUpdate">Carregando...</strong>
+      </div>
     </section>
 
     <section class="kpi-grid">
@@ -89,7 +94,7 @@
     <section class="table-card">
       <div class="card-title">
         <h2>Últimos registros</h2>
-        <p>Visualização dos dados recebidos no formulário.</p>
+        <p>Visualização resumida dos registros mais recentes.</p>
       </div>
       <div class="table-wrapper">
         <table>
@@ -97,14 +102,10 @@
             <tr>
               <th>Data/Hora</th>
               <th>Nome</th>
-              <th>Telefone</th>
-              <th>Desafio</th>
-              <th>Ferramenta</th>
-              <th>Meta 2026</th>
             </tr>
           </thead>
           <tbody id="recordsTable">
-            <tr><td colspan="6">Carregando dados...</td></tr>
+            <tr><td colspan="2">Carregando dados...</td></tr>
           </tbody>
         </table>
       </div>
