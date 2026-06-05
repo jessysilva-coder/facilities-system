@@ -6,13 +6,26 @@ const clearFilters = document.getElementById("clearFilters");
 const recordsTable = document.getElementById("recordsTable");
 const refreshDashboardButton = document.getElementById("refreshDashboard");
 const lastUpdate = document.getElementById("lastUpdate");
+const refreshCountdown = document.getElementById("refreshCountdown");
 
 let allData = [];
 let charts = {};
+let secondsToRefresh = 60;
+let isLoading = false;
 
 const monthNames = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+];
+
+const monthShortNames = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+];
+
+const bluePalette = [
+  "#0B3C5D", "#0E5A8A", "#1178B3", "#169BD5", "#38BDF8",
+  "#67D5FF", "#93E5FF", "#BDEFFF"
 ];
 
 function loadJsonp(url) {
@@ -83,27 +96,44 @@ function getFilteredData() {
   });
 }
 
+function getMonthlyBaseData() {
+  const selectedYear = yearFilter.value;
+
+  return allData.filter(item => {
+    const date = parseDate(item.dataHora);
+    if (!date) return false;
+    if (selectedYear !== "all" && date.getFullYear() !== Number(selectedYear)) return false;
+    return true;
+  });
+}
+
 function populateFilters() {
+  const currentMonth = monthFilter.value;
+  const currentYear = yearFilter.value;
   const years = new Set();
-  const months = new Set();
 
   allData.forEach(item => {
     const date = parseDate(item.dataHora);
-    if (date) {
-      years.add(date.getFullYear());
-      months.add(date.getMonth());
-    }
+    if (date) years.add(date.getFullYear());
   });
 
   monthFilter.innerHTML = '<option value="all">Todos</option>';
-  [...months].sort((a, b) => a - b).forEach(month => {
-    monthFilter.innerHTML += `<option value="${month}">${monthNames[month]}</option>`;
+  monthNames.forEach((month, index) => {
+    monthFilter.innerHTML += `<option value="${index}">${month}</option>`;
   });
 
   yearFilter.innerHTML = '<option value="all">Todos</option>';
   [...years].sort((a, b) => b - a).forEach(year => {
     yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
   });
+
+  if ([...monthFilter.options].some(option => option.value === currentMonth)) {
+    monthFilter.value = currentMonth;
+  }
+
+  if ([...yearFilter.options].some(option => option.value === currentYear)) {
+    yearFilter.value = currentYear;
+  }
 }
 
 function updateKpis(data) {
@@ -117,7 +147,39 @@ function updateKpis(data) {
   document.getElementById("principalMeta").textContent = topItem(metas);
 }
 
-function createChart(canvasId, type, labels, values, label) {
+function getDefaultOptions(type) {
+  const textColor = "rgba(255, 255, 255, 0.84)";
+  const gridColor = "rgba(255, 255, 255, 0.10)";
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: type === "doughnut" ? "bottom" : "top",
+        labels: { color: textColor }
+      }
+    }
+  };
+
+  if (type === "bar" || type === "line") {
+    options.scales = {
+      x: {
+        ticks: { color: textColor },
+        grid: { color: gridColor }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { precision: 0, color: textColor },
+        grid: { color: gridColor }
+      }
+    };
+  }
+
+  return options;
+}
+
+function createChart(canvasId, type, labels, values, label, extraDataset = {}, extraOptions = {}) {
   if (charts[canvasId]) charts[canvasId].destroy();
 
   charts[canvasId] = new Chart(document.getElementById(canvasId), {
@@ -127,20 +189,13 @@ function createChart(canvasId, type, labels, values, label) {
       datasets: [{
         label,
         data: values,
-        borderWidth: 2
+        borderWidth: 2,
+        ...extraDataset
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: type === "bar" ? "top" : "bottom"
-        }
-      },
-      scales: type === "bar" ? {
-        y: { beginAtZero: true, ticks: { precision: 0 } }
-      } : {}
+      ...getDefaultOptions(type),
+      ...extraOptions
     }
   });
 }
@@ -150,9 +205,91 @@ function updateCharts(data) {
   const ferramentas = countBy(data, "ferramenta");
   const metas = countBy(data, "meta");
 
-  createChart("desafiosChart", "doughnut", Object.keys(desafios), Object.values(desafios), "Desafios");
-  createChart("ferramentasChart", "bar", Object.keys(ferramentas), Object.values(ferramentas), "Ferramentas");
-  createChart("metasChart", "bar", Object.keys(metas), Object.values(metas), "Metas 2026");
+  createChart(
+    "desafiosChart",
+    "bar",
+    Object.keys(desafios),
+    Object.values(desafios),
+    "Desafios",
+    {
+      backgroundColor: "rgba(56, 189, 248, 0.55)",
+      borderColor: "rgba(125, 211, 252, 1)",
+      borderRadius: 10
+    }
+  );
+
+  createChart(
+    "ferramentasChart",
+    "doughnut",
+    Object.keys(ferramentas),
+    Object.values(ferramentas),
+    "Ferramentas",
+    {
+      backgroundColor: Object.keys(ferramentas).map((_, index) => bluePalette[index % bluePalette.length]),
+      borderColor: "rgba(255, 255, 255, 0.75)",
+      hoverOffset: 8
+    }
+  );
+
+  createChart(
+    "metasChart",
+    "bar",
+    Object.keys(metas),
+    Object.values(metas),
+    "Metas 2026",
+    {
+      backgroundColor: "rgba(14, 165, 233, 0.45)",
+      borderColor: "rgba(125, 211, 252, 1)",
+      borderRadius: 10
+    }
+  );
+
+  updateMonthlyChart();
+}
+
+function updateMonthlyChart() {
+  const data = getMonthlyBaseData();
+  const monthlyTotals = Array(12).fill(0);
+  const selectedMonth = monthFilter.value;
+
+  data.forEach(item => {
+    const date = parseDate(item.dataHora);
+    if (date) monthlyTotals[date.getMonth()] += 1;
+  });
+
+  const pointBackgroundColor = monthShortNames.map((_, index) => (
+    selectedMonth !== "all" && index === Number(selectedMonth)
+      ? "#FFFFFF"
+      : "#38BDF8"
+  ));
+
+  const pointBorderColor = monthShortNames.map((_, index) => (
+    selectedMonth !== "all" && index === Number(selectedMonth)
+      ? "#0EA5E9"
+      : "#BAE6FD"
+  ));
+
+  const pointRadius = monthShortNames.map((_, index) => (
+    selectedMonth !== "all" && index === Number(selectedMonth) ? 8 : 4
+  ));
+
+  createChart(
+    "respostasMesChart",
+    "line",
+    monthShortNames,
+    monthlyTotals,
+    "Respostas por mês",
+    {
+      borderColor: "#38BDF8",
+      backgroundColor: "rgba(56, 189, 248, 0.18)",
+      pointBackgroundColor,
+      pointBorderColor,
+      pointRadius,
+      pointHoverRadius: 9,
+      tension: 0.35,
+      fill: true
+    }
+  );
 }
 
 function updateTable(data) {
@@ -194,8 +331,29 @@ function updateLastUpdateTime() {
   }));
 }
 
+function resetCountdown() {
+  secondsToRefresh = 60;
+  if (refreshCountdown) refreshCountdown.textContent = `${secondsToRefresh}s`;
+}
+
+function updateCountdown() {
+  if (isLoading) return;
+
+  secondsToRefresh -= 1;
+  if (secondsToRefresh <= 0) {
+    initDashboard();
+    return;
+  }
+
+  if (refreshCountdown) refreshCountdown.textContent = `${secondsToRefresh}s`;
+}
+
 async function initDashboard() {
+  if (isLoading) return;
+
   try {
+    isLoading = true;
+
     if (refreshDashboardButton) {
       refreshDashboardButton.disabled = true;
       refreshDashboardButton.textContent = "Atualizando...";
@@ -208,10 +366,13 @@ async function initDashboard() {
     populateFilters();
     renderDashboard();
     updateLastUpdateTime();
+    resetCountdown();
   } catch (error) {
     recordsTable.innerHTML = '<tr><td colspan="2">Não foi possível carregar os dados. Verifique o código do Apps Script.</td></tr>';
     setLastUpdateStatus("Erro ao atualizar");
   } finally {
+    isLoading = false;
+
     if (refreshDashboardButton) {
       refreshDashboardButton.disabled = false;
       refreshDashboardButton.textContent = "Atualizar agora";
@@ -232,4 +393,4 @@ if (refreshDashboardButton) {
 }
 
 initDashboard();
-setInterval(initDashboard, 60000);
+setInterval(updateCountdown, 1000);
