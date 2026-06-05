@@ -23,9 +23,14 @@
         <span>Última atualização</span>
         <strong id="lastUpdate">Carregando...</strong>
       </div>
-      <div class="update-status subtle-update">
-        <span>Próxima atualização</span>
-        <strong id="refreshCountdown">60s</strong>
+      <div class="refresh-progress-card" aria-label="Progresso da próxima atualização automática">
+        <div class="refresh-progress-head">
+          <span>Próxima atualização</span>
+          <strong>Automática</strong>
+        </div>
+        <div class="refresh-progress-track">
+          <div id="refreshProgressBar" class="refresh-progress-fill"></div>
+        </div>
       </div>
       <button id="refreshDashboard" class="button-light" type="button">Atualizar agora</button>
     </div>
@@ -88,7 +93,7 @@
         <canvas id="ferramentasChart"></canvas>
       </article>
 
-      <article class="chart-card">
+      <article class="chart-card chart-wide metas-wide">
         <div class="card-title">
           <h2>Metas para 2026</h2>
           <p>Prioridades mais importantes para o próximo ciclo.</p>
