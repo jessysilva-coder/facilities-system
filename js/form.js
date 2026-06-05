@@ -25,32 +25,31 @@ telefoneInput.addEventListener("input", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const payload = {
-    nome: document.getElementById("nome").value.trim(),
-    telefone: document.getElementById("telefone").value.trim(),
-    desafio: document.getElementById("desafio").value,
-    ferramenta: document.getElementById("ferramenta").value,
-    meta: document.getElementById("meta").value
-  };
+  const payload = new URLSearchParams();
+  payload.append("nome", document.getElementById("nome").value.trim());
+  payload.append("telefone", document.getElementById("telefone").value.trim());
+  payload.append("desafio", document.getElementById("desafio").value);
+  payload.append("ferramenta", document.getElementById("ferramenta").value);
+  payload.append("meta", document.getElementById("meta").value);
 
   submitButton.disabled = true;
   submitButton.textContent = "Enviando...";
   message.textContent = "";
+  message.className = "form-message";
 
   try {
     await fetch(API_URL, {
       method: "POST",
       mode: "no-cors",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(payload)
+      body: payload
     });
 
     form.reset();
-    message.textContent = "Registro enviado com sucesso!";
+    message.textContent = "Registro enviado! Confira se ele apareceu na planilha.";
+    message.classList.add("success");
   } catch (error) {
     message.textContent = "Não foi possível enviar. Verifique a publicação do Apps Script.";
+    message.classList.add("error");
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Enviar registro";
